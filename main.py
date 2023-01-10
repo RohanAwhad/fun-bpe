@@ -1,7 +1,7 @@
 # Read shakespear.txt and create a word frequency dictionary
 
 from loguru import logger
-logger.add('main.log', format='{time} {level} {message}', level='DEBUG', rotation='1 MB')
+logger.add('logs/main.log', format='{time} {level} {message}', level='DEBUG', rotation='1 MB')
 
 from collections import Counter, defaultdict
 import re
