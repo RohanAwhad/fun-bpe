@@ -1,4 +1,4 @@
-# Read shakespear.txt and create a word frequency dictionary
+# Read shakespeare.txt and create a word frequency dictionary
 
 from loguru import logger
 logger.add('logs/main.log', format='{time} {level} {message}', level='DEBUG', rotation='1 MB')
@@ -109,7 +109,8 @@ def main():
         tokens.append(''.join(pair))
 
     tokens.sort(key=len, reverse=True)
-    print(tokens)
+    with open('bpe_tokens.txt', 'w') as f:
+        f.write('\n'.join(tokens))
 
 if __name__ == '__main__':
     main()
