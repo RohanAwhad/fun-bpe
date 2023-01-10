@@ -1,7 +1,11 @@
 # Read shakespeare.txt and create a word frequency dictionary
 
+import sys
 from loguru import logger
 logger.add('logs/main.log', format='{time} {level} {message}', level='DEBUG', rotation='1 MB')
+
+# set WARNING level for the loguru logger in std out
+logger.add(sys.stdout, format='{time} {level} {message}', level='WARNING', backtrace=True, diagnose=True)
 
 from collections import Counter, defaultdict
 import re
@@ -29,9 +33,6 @@ def get_word_freq_dict(filename):
 
         for word, freq in word_dict.items():
             vocab[word] += freq
-
-        if len(vocab) > 500:
-            break
 
     fstream.close()
     logger.info('Read file: {}'.format(filename))
@@ -78,9 +79,7 @@ def replace_string(vocab, pair, indices):
 
 
 
-
-
-def main():
+def learn_bpe():
     filename = 'shakespeare.txt'
     vocab = get_word_freq_dict(filename)
 
@@ -90,7 +89,7 @@ def main():
     vocab = sorted(vocab.items(), key=lambda x: x[1], reverse=True)
 
     # BPE
-    n_bpe_operations = 100
+    n_bpe_operations = 3000
     tokens = []
     for i in range(n_bpe_operations):
         logger.info(f'BPE Operation: {i}')
@@ -111,6 +110,47 @@ def main():
     tokens.sort(key=len, reverse=True)
     with open('bpe_tokens.txt', 'w') as f:
         f.write('\n'.join(tokens))
+
+
+def encode(text: str):
+    """
+    Encode the given text using the BPE tokens.
+    """
+    with open('bpe_tokens.txt', 'r') as f:
+        tokens = f.read().split('\n')
+
+    # remove punctuation
+    text = re.sub(r'[^\w\s]', '', text)
+
+    # convert to lowercase
+    text = text.lower()
+
+    # split the text into words
+    words = text.split()
+
+    # add </w> to the end of each word
+    words = [word + '</w>' for word in words]
+
+    # encode each word
+    encoded_words = []
+    for word in words:
+        for token in tokens:
+            len_token = len(token)
+            if word[:len_token] == token:
+                word = word[len_token:]
+                encoded_words.append(token)
+
+            if word == '':
+                break
+
+    return encoded_words
+
+
+def main():
+    learn_bpe()
+
+    text = "Before we proceed any further, hear me speak"
+    print(encode(text))
 
 if __name__ == '__main__':
     main()
