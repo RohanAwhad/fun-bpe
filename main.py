@@ -112,6 +112,17 @@ def learn_bpe():
         f.write('\n'.join(tokens))
 
 
+def _get_token(tokens: list[str], word: str):
+    """
+    Get the token for the given word.
+    """
+    for token in tokens:
+        len_token = len(token)
+        if word[:len_token] == token:
+            return token
+    return '[UNK]'
+
+
 def encode(text: str):
     """
     Encode the given text using the BPE tokens.
@@ -134,22 +145,21 @@ def encode(text: str):
     # encode each word
     encoded_words = []
     for word in words:
-        for token in tokens:
-            len_token = len(token)
-            if word[:len_token] == token:
-                word = word[len_token:]
-                encoded_words.append(token)
+        while True:
+            token = _get_token(tokens, word)
+            encoded_words.append(token)
+            word = word[len(token):]
 
-            if word == '':
+            if token == '[UNK]' or word == '':
                 break
 
     return encoded_words
 
 
 def main():
-    learn_bpe()
+    # learn_bpe()
 
-    text = "Before we proceed any further, hear me speak"
+    text = "We are accounted poor citizens, the patricians good"
     print(encode(text))
 
 if __name__ == '__main__':
