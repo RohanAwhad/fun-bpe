@@ -1,12 +1,9 @@
-# Read shakespeare.txt and create a word frequency dictionary
+# Create a Byte Pair Encoding (BPE) tokenizer using the Shakespeare dataset.
 
-import sys
 from loguru import logger
 logger.add('logs/main.log', format='{time} {level} {message}', level='DEBUG', rotation='1 MB')
 
-# set WARNING level for the loguru logger in std out
-logger.add(sys.stdout, format='{time} {level} {message}', level='WARNING', backtrace=True, diagnose=True)
-
+import argparse
 from collections import Counter, defaultdict
 import re
 
@@ -156,11 +153,39 @@ def encode(text: str):
     return encoded_words
 
 
-def main():
-    # learn_bpe()
+def decode(encoded_text: list[str]):
+    """
+    Decode the given encoded text.
+    """
+    return ''.join(encoded_text).replace('</w>', ' ')
 
-    text = "We are accounted poor citizens, the patricians good"
-    print(encode(text))
+
+def main(args):
+    if args.learn:
+        learn_bpe()
+
+    try:
+        print('Press Ctrl+C to exit...')
+        while True:
+            if args.mode == 'encode':
+                encoded_text = encode(input('Enter text: '))
+                print(encoded_text)
+
+            elif args.mode == 'decode':
+                decoded_text = decode(eval(input('Enter encoded text: ')))
+                print(decoded_text)
+    except KeyboardInterrupt:
+        print('\nExiting...')
+
 
 if __name__ == '__main__':
-    main()
+    # create an argument parser with learn flag
+    # and encode and decode modes
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--learn', action='store_true', help='Learn BPE tokens')
+    parser.add_argument('--mode', type=str, default='encode', help='Mode: encode or decode')
+
+    # parse the arguments
+    args = parser.parse_args()
+
+    main(args)
